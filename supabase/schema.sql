@@ -20,6 +20,7 @@ create table if not exists public.cv_sources (
   mime_type text not null,
   modified_time timestamptz,
   text_hash text,
+  text_content text,
   last_scanned_at timestamptz,
   created_at timestamptz not null default now()
 );

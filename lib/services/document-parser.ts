@@ -4,9 +4,10 @@ import pdf from "pdf-parse";
 
 const PDF_MIME = "application/pdf";
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+export const GOOGLE_DOC_MIME = "application/vnd.google-apps.document";
 
 export function isSupportedCvMimeType(mimeType: string) {
-  return mimeType === PDF_MIME || mimeType === DOCX_MIME;
+  return mimeType === PDF_MIME || mimeType === DOCX_MIME || mimeType === GOOGLE_DOC_MIME;
 }
 
 export async function extractDocumentText(buffer: Buffer, mimeType: string) {

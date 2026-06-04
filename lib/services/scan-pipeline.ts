@@ -100,12 +100,10 @@ export async function runScanJob(job: ScanJob, emailText: string) {
 
     await sendMatchReport(completedJob, savedMatches);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown scan failure";
     await supabase
       .from("scan_jobs")
-      .update({ status: "failed", error_message: message.slice(0, 1000), completed_at: new Date().toISOString() })
+      .update({ status: "failed", error_message: error instanceof Error ? error.message : String(error) })
       .eq("id", job.id);
-
     throw error;
   }
 }
@@ -114,12 +112,9 @@ async function matchDocuments(
   structuredRequest: Awaited<ReturnType<typeof structurePositionRequest>>,
   cvDocuments: CvDocument[],
 ) {
-  const matches: Array<{ cv: CvDocument; match: CandidateMatch }> = [];
-
-  for (const cv of cvDocuments) {
-    const match = await matchCvToRequest(structuredRequest, cv);
-    matches.push({ cv, match });
-  }
+  const matches = await Promise.all(
+    cvDocuments.map(async (cv) => ({ cv, match: await matchCvToRequest(structuredRequest, cv) })),
+  );
 
   return matches
     .sort((left, right) => right.match.score - left.match.score)
@@ -137,6 +132,7 @@ async function upsertCvSource(cv: CvDocument) {
         mime_type: cv.mimeType,
         modified_time: cv.modifiedTime,
         text_hash: cv.textHash,
+        text_content: cv.text,
         last_scanned_at: new Date().toISOString(),
       },
       { onConflict: "drive_file_id" },

@@ -5,6 +5,7 @@ import type { MatchResult, ScanJob } from "@/lib/types";
 
 export function verifyResendWebhook(rawBody: string, headers: Headers) {
   const env = getEnv();
+  if (!env.RESEND_WEBHOOK_SECRET) throw new Error("RESEND_WEBHOOK_SECRET is not configured");
   const webhook = new Webhook(env.RESEND_WEBHOOK_SECRET);
 
   return webhook.verify(rawBody, {
@@ -18,9 +19,11 @@ export async function sendMatchReport(job: ScanJob, matches: MatchResult[]) {
   const env = getEnv();
   const resend = new Resend(env.RESEND_API_KEY);
 
+  const recipient = job.email_from ?? env.RESULT_EMAIL_TO;
+
   await resend.emails.send({
     from: env.RESULT_EMAIL_FROM,
-    to: env.RESULT_EMAIL_TO,
+    to: recipient,
     subject: `CV matchrapport: ${job.email_subject ?? "nieuwe aanvraag"}`,
     html: renderReportHtml(job, matches),
     text: renderReportText(job, matches),

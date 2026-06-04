@@ -1,8 +1,13 @@
 .next
 node_modules
 .env
+.env.local
 .env*.local
 !.env.local.example
 dist
 coverage
 *.log
+.idea
+
+# Local Google Cloud service account credentials
+winter-accord-*.json

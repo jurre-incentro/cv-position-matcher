@@ -8,6 +8,7 @@ export function MatchCard({ match }: { match: MatchResult }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-sm font-medium text-moss">#{match.rank}</div>
+
           <h2 className="mt-1 text-xl font-semibold text-ink">{match.candidate_name}</h2>
           <p className="mt-1 text-sm text-ink/60">{match.role_title ?? match.cv_sources?.file_name ?? "CV match"}</p>
         </div>

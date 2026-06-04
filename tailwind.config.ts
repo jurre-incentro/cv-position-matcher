@@ -9,15 +9,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#17211c",
-        mist: "#eef4f0",
-        line: "#d8e3dc",
-        moss: "#3e6f59",
-        copper: "#b26442",
+        ink: "#000000",
+        mist: "#f5f3f2",
+        line: "#e3dcd8",
+        moss: "#FF5500",
+        "moss-dark": "#E04B00",
+        copper: "#c45c1a",
         sky: "#3d7899",
       },
       boxShadow: {
-        soft: "0 8px 32px rgba(23, 33, 28, 0.08)",
+        soft: "0 8px 32px rgba(0, 0, 0, 0.08)",
+      },
+      fontFamily: {
+        sans: ["General Sans", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },

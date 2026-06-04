@@ -16,7 +16,7 @@ const statusConfig = {
   },
   completed: {
     label: "Klaar",
-    className: "bg-moss/10 text-moss",
+    className: "bg-emerald-50 text-emerald-700",
     icon: CheckCircle2,
   },
   failed: {

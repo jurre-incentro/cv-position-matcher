@@ -36,6 +36,15 @@ npm install
 
 3. Kopieer `.env.local.example` naar `.env.local` en vul alle waarden in.
 
+   Als je Supabase via Vercel hebt gekoppeld, kan Vercel al `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY` of `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` hebben.
+   De app accepteert die namen ook. Als de integratie een prefix heeft, zoals `STORAGE_CV_`,
+   accepteert de app ook `STORAGE_CV_SUPABASE_URL`,
+   `NEXT_PUBLIC_STORAGE_CV_SUPABASE_ANON_KEY`,
+   `NEXT_PUBLIC_STORAGE_CV_SUPABASE_PUBLISHABLE_KEY`,
+   `STORAGE_CV_SUPABASE_SERVICE_ROLE_KEY` en `STORAGE_CV_SUPABASE_SECRET_KEY`.
+   Lokaal kun je ze handmatig overnemen in `.env.local`.
+
 4. Deel de Google Drive-folder met het service-account emailadres.
 
 5. Configureer in Resend inbound email forwarding naar:

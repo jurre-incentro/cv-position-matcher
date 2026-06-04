@@ -28,7 +28,7 @@ export default async function ScanDetailPage({ params }: { params: Promise<{ id:
     <main className="min-h-screen">
       <header className="border-b border-line bg-white">
         <div className="mx-auto max-w-6xl px-5 py-6">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-moss">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-moss hover:text-moss-dark">
             <ArrowLeft className="h-4 w-4" />
             Terug naar scans
           </Link>
