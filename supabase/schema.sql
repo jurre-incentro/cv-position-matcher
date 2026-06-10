@@ -22,6 +22,7 @@ create table if not exists public.cv_sources (
   text_hash text,
   text_content text,
   last_scanned_at timestamptz,
+  is_active boolean not null default true,
   created_at timestamptz not null default now()
 );
 
@@ -40,6 +41,7 @@ create table if not exists public.match_results (
   created_at timestamptz not null default now()
 );
 
+create index if not exists cv_sources_is_active_idx on public.cv_sources(is_active) where is_active = true;
 create index if not exists match_results_scan_job_id_idx on public.match_results(scan_job_id);
 create index if not exists match_results_rank_idx on public.match_results(scan_job_id, rank);
 create index if not exists scan_jobs_created_at_idx on public.scan_jobs(created_at desc);

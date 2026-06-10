@@ -1,8 +1,9 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import { fetchCvDocumentsFromDrive } from "@/lib/services/google-drive";
+import { syncCvSourcesWithDrive, upsertCvSourceDocument } from "@/lib/services/google-drive";
+import { scrapeVacancyPage } from "@/lib/services/vacancy-scraper";
 import { matchCvToRequest, structurePositionRequest } from "@/lib/services/openrouter";
 import { sendMatchReport } from "@/lib/services/resend";
-import type { CandidateMatch, CvDocument, MatchResult, ScanJob } from "@/lib/types";
+import type { CvDocument, MatchResult, ScanJob } from "@/lib/types";
 
 export type InboundEmail = {
   messageId: string | null;
@@ -32,16 +33,30 @@ export async function createAndRunScan(email: InboundEmail) {
   return job as ScanJob;
 }
 
+
+export async function createAndRunVacancyUrlScan(url: string) {
+  const scrapedVacancy = await scrapeVacancyPage(url);
+  const vacancyText = `Vacaturelink: ${scrapedVacancy.url}\n${scrapedVacancy.title ? `Titel: ${scrapedVacancy.title}\n` : ""}\n${scrapedVacancy.text}`;
+
+  return createAndRunScan({
+    messageId: null,
+    from: scrapedVacancy.url,
+    subject: scrapedVacancy.title ?? `Vacature: ${scrapedVacancy.url}`,
+    text: vacancyText,
+  });
+}
+
 export async function runScanJob(job: ScanJob, emailText: string) {
   const supabase = createSupabaseAdminClient();
 
   try {
     await supabase.from("scan_jobs").update({ status: "processing" }).eq("id", job.id);
 
-    const [structuredRequest, cvDocuments] = await Promise.all([
+    const [structuredRequest, cvSync] = await Promise.all([
       structurePositionRequest(emailText),
-      fetchCvDocumentsFromDrive(),
+      syncCvSourcesWithDrive(),
     ]);
+    const cvDocuments = cvSync.documents;
 
     if (!cvDocuments.length) {
       throw new Error("No supported PDF or DOCX CVs found in the configured Google Drive folder");
@@ -108,13 +123,21 @@ export async function runScanJob(job: ScanJob, emailText: string) {
   }
 }
 
+const MATCH_CONCURRENCY = 5;
+
 async function matchDocuments(
   structuredRequest: Awaited<ReturnType<typeof structurePositionRequest>>,
   cvDocuments: CvDocument[],
 ) {
-  const matches = await Promise.all(
-    cvDocuments.map(async (cv) => ({ cv, match: await matchCvToRequest(structuredRequest, cv) })),
-  );
+  const matches: { cv: CvDocument; match: Awaited<ReturnType<typeof matchCvToRequest>> }[] = [];
+
+  for (let i = 0; i < cvDocuments.length; i += MATCH_CONCURRENCY) {
+    const batch = cvDocuments.slice(i, i + MATCH_CONCURRENCY);
+    const batchResults = await Promise.all(
+      batch.map(async (cv) => ({ cv, match: await matchCvToRequest(structuredRequest, cv) })),
+    );
+    matches.push(...batchResults);
+  }
 
   return matches
     .sort((left, right) => right.match.score - left.match.score)
@@ -122,27 +145,5 @@ async function matchDocuments(
 }
 
 async function upsertCvSource(cv: CvDocument) {
-  const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from("cv_sources")
-    .upsert(
-      {
-        drive_file_id: cv.driveFileId,
-        file_name: cv.fileName,
-        mime_type: cv.mimeType,
-        modified_time: cv.modifiedTime,
-        text_hash: cv.textHash,
-        text_content: cv.text,
-        last_scanned_at: new Date().toISOString(),
-      },
-      { onConflict: "drive_file_id" },
-    )
-    .select("id")
-    .single();
-
-  if (error || !data) {
-    throw new Error(`Could not upsert CV source: ${error?.message ?? "unknown error"}`);
-  }
-
-  return data.id as string;
+  return upsertCvSourceDocument(cv);
 }

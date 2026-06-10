@@ -11,3 +11,4 @@ coverage
 
 # Local Google Cloud service account credentials
 winter-accord-*.json
+.vercel

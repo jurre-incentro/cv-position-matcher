@@ -40,6 +40,14 @@ export default async function HomePage() {
               <Plus className="h-4 w-4" />
               Nieuwe scan
             </Link>
+            <form action="/api/auth/logout" method="POST">
+              <button
+                type="submit"
+                className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink/60 transition hover:text-ink"
+              >
+                Uitloggen
+              </button>
+            </form>
           </div>
         </div>
       </header>
