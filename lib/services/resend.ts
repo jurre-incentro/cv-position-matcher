@@ -1,11 +1,10 @@
 import { Resend } from "resend";
 import { Webhook } from "svix";
-import { getEnv } from "@/lib/env";
+import { getResendReportEnv, getResendWebhookEnv } from "@/lib/env";
 import type { MatchResult, ScanJob } from "@/lib/types";
 
 export function verifyResendWebhook(rawBody: string, headers: Headers) {
-  const env = getEnv();
-  if (!env.RESEND_WEBHOOK_SECRET) throw new Error("RESEND_WEBHOOK_SECRET is not configured");
+  const env = getResendWebhookEnv();
   const webhook = new Webhook(env.RESEND_WEBHOOK_SECRET);
 
   return webhook.verify(rawBody, {
@@ -16,7 +15,7 @@ export function verifyResendWebhook(rawBody: string, headers: Headers) {
 }
 
 export async function sendMatchReport(job: ScanJob, matches: MatchResult[]) {
-  const env = getEnv();
+  const env = getResendReportEnv();
   const resend = new Resend(env.RESEND_API_KEY);
 
   const recipient = job.email_from ?? env.RESULT_EMAIL_TO;

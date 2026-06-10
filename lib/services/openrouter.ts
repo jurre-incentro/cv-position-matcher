@@ -1,4 +1,4 @@
-import { getEnv } from "@/lib/env";
+import { getOpenRouterEnv } from "@/lib/env";
 import type { CandidateMatch, CvDocument, StructuredPositionRequest } from "@/lib/types";
 
 type OpenRouterMessage = {
@@ -48,7 +48,7 @@ export async function matchCvToRequest(request: StructuredPositionRequest, cv: C
 }
 
 async function callOpenRouter(messages: OpenRouterMessage[]) {
-  const env = getEnv();
+  const env = getOpenRouterEnv();
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
