@@ -1,7 +1,1 @@
-{
-  "functions": {
-    "app/api/webhooks/resend/route.ts": {
-      "maxDuration": 60
-    }
-  }
-}
+{}
